@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/aleafs/netblackhole.png)](http://travis-ci.org/aleafs/netblackhole)
+[![Build Status](https://secure.travis-ci.org/TBEDP/netblackhole.png?branch=master)](http://travis-ci.org/TBEDP/netblackhole)
 
 # About
 
