@@ -19,6 +19,10 @@ var sizedqueue = function (size) {
     return _data;
   };
 
+  _me.clean = function () {
+    _data   = [];
+  };
+
   return _me;
 };
 
@@ -37,8 +41,7 @@ exports.create = function (port, options) {
     'allowHalfOpen' : _options.allowHalfOpen,
   };
 
-  require('net').createServer(_conf, function (c) {
-    console.log(c);
+  var s = require('net').createServer(_conf, function (c) {
     _msgs.push({
       'evt' : 'connected',
     });
@@ -46,6 +49,7 @@ exports.create = function (port, options) {
     c.on('data', function (data) {
       _msgs.push({
         'evt' : 'data',
+        'arg' : data,
       });
     });
 
@@ -54,13 +58,23 @@ exports.create = function (port, options) {
         'evt' : 'end',
       });
     });
-  }).listen(port, function () {
+  });
+  s.listen(port, function () {
     console.log('NetBlackHole listened at "' + port + '"');
   });
 
   var _me   = {};
+
+  _me.clean = function () {
+    _msgs.clean();
+  };
+
   _me.msgs  = function () {
     return _msgs.all();
+  };
+
+  _me.close = function () {
+    s.close();
   };
 
   return _me;
