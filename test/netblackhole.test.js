@@ -14,6 +14,7 @@ describe('net blackhole', function () {
 
   beforeEach(function () {
     _http.clean();
+    _http.never_response();
   });
 
   /* {{{ should_blackhole_does_not_reply_any_time() */
@@ -31,6 +32,17 @@ describe('net blackhole', function () {
       _body.arg.toString().should.include('GET / HTTP/1.1');
       _body.arg.toString().should.include('Host: localhost:10241');
 
+      done();
+    });
+  });
+  /* }}} */
+
+  /* {{{ should_close_when_connect_works_fine() */
+  it('should_close_when_connect_works_fine', function (done) {
+    _http.close_when_connect('HTTP/1.1 404 NOT FOUND\r\n\r\n');
+    urllib.request('http:/' + '/localhost:10241', {'timeout' : 10}, function (error, data, res) {
+      should.ok(!error);
+      res.should.have.property('statusCode', 404);
       done();
     });
   });

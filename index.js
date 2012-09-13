@@ -1,5 +1,9 @@
 /* vim: set expandtab tabstop=2 shiftwidth=2 foldmethod=marker: */
 
+"use strict";
+
+/* {{{ private sizedqueue() */
+
 var sizedqueue = function (size) {
 
   var _data = [];
@@ -26,6 +30,8 @@ var sizedqueue = function (size) {
   return _me;
 };
 
+/* }}} */
+
 exports.create = function (port, options) {
 
   var _options = {
@@ -41,12 +47,20 @@ exports.create = function (port, options) {
     'allowHalfOpen' : _options.allowHalfOpen,
   };
 
+  var _evts = {};
+
+  /**
+   * @ private server s
+   */
+  /* {{{ */
   var s = require('net').createServer(_conf, function (c) {
+    _evts.conn && (_evts.conn)(c);
     _msgs.push({
       'evt' : 'connected',
     });
 
     c.on('data', function (data) {
+      _evts.data && (_evts.data)(data);
       _msgs.push({
         'evt' : 'data',
         'arg' : data,
@@ -54,6 +68,7 @@ exports.create = function (port, options) {
     });
 
     c.on('end', function () {
+      _evts.end && (_evts.end)();
       _msgs.push({
         'evt' : 'end',
       });
@@ -62,6 +77,7 @@ exports.create = function (port, options) {
   s.listen(port, function () {
     console.log('NetBlackHole listened at "' + port + '"');
   });
+  /* }}} */
 
   var _me   = {};
 
@@ -75,6 +91,16 @@ exports.create = function (port, options) {
 
   _me.close = function () {
     s.close();
+  };
+
+  _me.never_response = function () {
+    _evts.conn = function (c) {};
+  };
+
+  _me.close_when_connect = function (data) {
+    _evts.conn = function (c) {
+      c.end(data);
+    };
   };
 
   return _me;
